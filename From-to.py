@@ -1,15 +1,15 @@
 # this one is different because it will have a source filder and a destination folder 
 # instead of everything in one folder
-# Daniel B. 
+# Whiffy 
 # 6/4/21 
 
 import os
 from shutil import move
 
 #these will be the Path of the source folder and the destination folder
-FROM_FOLDER = r'C:\Users\Whiffy\Downloads'
-TO_FOLDER = r'D:\Random Files'
-BEAT_SABER_SWORD_LOCATION = r'D:\Program Files(x86)\SteamLibrary\steamapps\common\Beat Saber\CustomSabers'
+FROM_FOLDER = r''#the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
+TO_FOLDER = r''
+BEAT_SABER_SWORD_LOCATION = r''
 
 
 
@@ -20,16 +20,17 @@ EXCLUDE = ['ini', '2', 'lnk', '7z', 'java', 'py', '11103', '1']
 CONFIRM_FILE_TYPES = ['exe', 'msi', 'jar']
 
 #list of files that might need confirmation
-NEEDS_CONFIRMATION = []
+NEEDS_CONFIRMATION = []#leave this list empty
 
 #list of videos whose name starts with redditsave
-REDDITSAVE_VIDEOS = []
+REDDITSAVE_VIDEOS = []#leave this list empty
 
 def main():
     sort()
     redditsaveRemove()
     confirmations()
 
+#sequential search 
 def seqSearch(to_find, to_search):
     for i in range(len(to_search)):
         tmp = to_search[i]
@@ -38,6 +39,7 @@ def seqSearch(to_find, to_search):
             return i
     return -1
 
+#main sorting function. 
 def sort():
     #make a an organized list of all the files in the folder
     list_ = os.listdir(FROM_FOLDER)
@@ -72,6 +74,7 @@ def sort():
             os.makedirs(TO_FOLDER + '/' + ext)
             move(FROM_FOLDER + '/' + file_, TO_FOLDER + '/' + ext + '/' + file_)
 
+#prompts users if they tould like to delete particular file types
 def confirmations():
     for file_ in NEEDS_CONFIRMATION:
         print('\n' + file_ + ' might be an installation file, would you like to move it to the recycle bin?')
@@ -89,7 +92,7 @@ def confirmations():
             print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
             continue
 
-
+#I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
 def redditsaveRemove():
     for i in REDDITSAVE_VIDEOS:
         name, ext = os.path.splitext(i)
