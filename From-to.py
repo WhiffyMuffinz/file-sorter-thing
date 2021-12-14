@@ -89,6 +89,7 @@ def sort():
         else:
             os.makedirs(TO_FOLDER + "/" + ext)
             move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
+        sort()
 
 
 # prompts users if they tould like to delete particular file types
@@ -113,7 +114,7 @@ def confirmations():
             print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
             continue
         
-        sort()
+        
 
 def handle_name_conflict(file_from: str, file_to: str):
     """handles a naming conflict between two files
