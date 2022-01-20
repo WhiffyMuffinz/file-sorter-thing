@@ -18,7 +18,7 @@ BEAT_SABER_SWORD_LOCATION = (
 EXCLUDE = ["ini", "2", "lnk", "7z", "java", "py", "11103", "1"]
 
 # list of file types that might need confirmation
-CONFIRM_FILE_TYPES = ["exe", "msi", "jar"]
+CONFIRM_FILE_TYPES = ["exe", "msi", "jar", "jpg~", "png~"]
 
 # list of files that might need confirmation
 NEEDS_CONFIRMATION = []  # leave this list empty
@@ -28,9 +28,12 @@ REDDITSAVE_VIDEOS = []  # leave this list empty
 
 
 def main():
+
+
     sort()
     redditsave_remove()
     confirmations()
+    sort()
 
 
 # sequential search
@@ -48,7 +51,6 @@ def sort():
     # make a an organized list of all the files in the folder
     list_ = os.listdir(FROM_FOLDER)
     print("FROM: {}".format(FROM_FOLDER))
-    # dest_list = os.listdir(TO_FOLDER)
     print("TO: {}".format(TO_FOLDER))
 
     for file_ in list_:
@@ -57,9 +59,6 @@ def sort():
 
         # idk wtf this does
         ext = ext[1:]
-
-        # if name_conflicts(file_, dest_list):
-        #    continue
 
         if ext == "" or seq_search(ext, EXCLUDE) != -1:
             continue
@@ -89,16 +88,14 @@ def sort():
         else:
             os.makedirs(TO_FOLDER + "/" + ext)
             move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
-        sort()
+    
 
 
 # prompts users if they tould like to delete particular file types
 def confirmations():
     for file_ in NEEDS_CONFIRMATION:
         print(
-            "\n"
-            + file_
-            + " might be an installation file, would you like to move it to the recycle bin?"
+            f"\n{file_} could be a temp or an installation file. Would you like to move it to the recycle bin?"
         )
 
         name, ext = os.path.splitext(file_)
@@ -114,13 +111,6 @@ def confirmations():
             print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
             continue
         
-        
-
-def handle_name_conflict(file_from: str, file_to: str):
-    """handles a naming conflict between two files
-    Params: 
-    file_from: path of the file in source folder 
-    file_to: path of the file in destination folder"""
 
 
 # I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
