@@ -13,8 +13,8 @@ BEAT_SABER_SWORD_LOCATION = r''
 
 
 
-#excluded filetypes
-EXCLUDE = ['ini', '2', 'lnk', '7z', 'java', 'py', '11103', '1']
+# list of file types that might need confirmation
+CONFIRM_FILE_TYPES = ["exe", "msi", "jar", "jpg~", "png~"]
 
 #list of file types that might need confirmation
 CONFIRM_FILE_TYPES = ['exe', 'msi', 'jar']
@@ -26,9 +26,12 @@ NEEDS_CONFIRMATION = []#leave this list empty
 REDDITSAVE_VIDEOS = []#leave this list empty
 
 def main():
+
+
     sort()
     redditsaveRemove()
     confirmations()
+    sort()
 
 #sequential search 
 def seqSearch(to_find, to_search):
@@ -43,8 +46,8 @@ def seqSearch(to_find, to_search):
 def sort():
     #make a an organized list of all the files in the folder
     list_ = os.listdir(FROM_FOLDER)
-    print('FROM: {}'.format(FROM_FOLDER))
-    print('TO: {}'.format(TO_FOLDER))
+    print("FROM: {}".format(FROM_FOLDER))
+    print("TO: {}".format(TO_FOLDER))
 
     for file_ in list_:
         #split the name of the file at the period 
@@ -53,7 +56,7 @@ def sort():
         #idk wtf this does
         ext = ext[1:]
 
-        if ext == '' or seqSearch(ext, EXCLUDE) != -1:
+        if ext == "" or seq_search(ext, EXCLUDE) != -1:
             continue
 
         if seqSearch(ext, CONFIRM_FILE_TYPES) != -1:
@@ -78,8 +81,10 @@ def sort():
 #prompts users if they tould like to delete particular file types
 def confirmations():
     for file_ in NEEDS_CONFIRMATION:
-        print('\n' + file_ + ' might be an installation file, would you like to move it to the recycle bin?')
-        
+        print(
+            f"\n{file_} could be a temp or an installation file. Would you like to move it to the recycle bin?"
+        )
+
         name, ext = os.path.splitext(file_)
 
         try:
@@ -93,8 +98,6 @@ def confirmations():
             print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
             continue
         
-        
-
 
 
 #I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
