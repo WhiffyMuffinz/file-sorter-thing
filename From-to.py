@@ -76,7 +76,11 @@ def sort():
         else:
             os.makedirs(TO_FOLDER + "/" + ext)
             move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> parent of 14caed2 (fixed an issue where confirmations() ran more than once)
 
 #prompts users if they tould like to delete particular file types
 def confirmations():
@@ -98,6 +102,16 @@ def confirmations():
             print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
             continue
         
+<<<<<<< HEAD
+=======
+        sort()
+
+def handle_name_conflict(file_from: str, file_to: str):
+    """handles a naming conflict between two files
+    Params: 
+    file_from: path of the file in source folder 
+    file_to: path of the file in destination folder"""
+>>>>>>> parent of 14caed2 (fixed an issue where confirmations() ran more than once)
 
 
 #I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
