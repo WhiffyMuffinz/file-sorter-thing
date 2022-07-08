@@ -8,10 +8,14 @@ from shutil import move
 from tqdm import tqdm
 
 # these will be the Path of the source folder and the destination folder
-FROM_FOLDER = r"C:/Users/Whiffy/Downloads"  # the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
+FROM_FOLDER = r"C:/Users/Skippy/Downloads"  # the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
 TO_FOLDER = r"D:/Archive/Random Files"
-BEAT_SABER_SWORD_LOCATION = r""
+
+
+# commonly used strings
 RED_SAV = "redditsave.com"
+CONFIRM_LOCATION = r"~/.config/file-sort-thing/confirm-file-types.conf"
+PATHS_LOCATION = r"~/.config/file-sort-thing/paths.conf"
 
 # list of file types that might need confirmation
 CONFIRM_FILE_TYPES = [
@@ -33,7 +37,75 @@ NEEDS_CONFIRMATION = []  # leave this list empty
 REDDITSAVE_VIDEOS = []  # leave this list empty
 
 
+def config():
+    """this function will be used to configure the program"""
+    """first check ~/.config/file-sort-thing/paths.conf for the location of the source and destination folders"""
+    """if the file doesn't exist, prompt the user to create it"""
+    """then look for a file in the same folder called `confirm-file-types` and add the file types to the list CONFIRM_FILE_TYPES"""
+
+    conf_paths()
+    conf_types()
+
+
+def conf_paths():
+    # check if the file exists
+    if os.path.exists(os.path.expanduser(PATHS_LOCATION)):
+        # if it does, read the file
+        with open(os.path.expanduser(PATHS_LOCATION), "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                if line.startswith("source"):
+                    FROM_FOLDER = line.split("=")[1].strip()
+                    if not os.path.exists(FROM_FOLDER):
+                        print(
+                            "There was an error with the source path. Please check the file."
+                        )
+                if line.startswith("destination"):
+                    TO_FOLDER = line.split("=")[1].strip()
+                    if not os.path.exists(TO_FOLDER):
+                        print(
+                            "There was an error with the destination path. Please check the file."
+                        )
+    else:
+        # if it doesn't, create it and prompt the user to fill it out manualy
+        with open(os.path.expanduser(PATHS_LOCATION), "w") as f:
+            f.write(
+                "# this file is used to configure the program\n"
+                + "# absolute paths are recommended\n"
+                + "# if using Windows, remember to use double backslashes\n"
+                + "source="
+                + "\n"
+                + "destination="
+                + "\n"
+            )
+
+
+def conf_types():
+    # check if the file exists
+    if os.path.exists(os.path.expanduser(CONFIRM_LOCATION)):
+        # if it does, read the file
+        with open(os.path.expanduser(CONFIRM_LOCATION), "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                CONFIRM_FILE_TYPES.append(line.strip())
+    else:
+        # if it doesn't, create it and add the baked in file types to the list
+        with open(os.path.expanduser(CONFIRM_LOCATION), "w") as f:
+
+            for ext in CONFIRM_FILE_TYPES:
+                f.write(ext + "\n")
+
+            # inform the user that the file has been created, and that they should add the file types to the list
+            print(
+                "a file for confirming file types has been created in the config folder."
+            )
+            print(
+                "please add the file types you want to be prompted for to the list in the file."
+            )
+
+
 def main():
+    config()
     sort()
 
 
