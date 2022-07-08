@@ -11,10 +11,19 @@ from tqdm import tqdm
 FROM_FOLDER = r"C:/Users/Whiffy/Downloads"  # the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
 TO_FOLDER = r"D:/Archive/Random Files"
 BEAT_SABER_SWORD_LOCATION = r""
-
+RED_SAV = "redditsave.com"
 
 # list of file types that might need confirmation
-CONFIRM_FILE_TYPES = ["exe", "msi", "jar", "jpg~", "png~", "apk", "xapk"]
+CONFIRM_FILE_TYPES = [
+    "exe",
+    "msi",
+    "jar",
+    "jpg~",
+    "png~",
+    "apk",
+    "xapk",
+    "appinstaller",
+]
 
 
 # list of files that might need confirmation
@@ -25,10 +34,7 @@ REDDITSAVE_VIDEOS = []  # leave this list empty
 
 
 def main():
-    sort_new()
-    # redditsave_remove()
-    # confirmations()
-    # sort()
+    sort()
 
 
 # sequential search
@@ -43,30 +49,18 @@ def seq_search(to_find, to_search):
 
 # main sorting function.
 def sort():
-    # make a an organized list of all the files in the folder
     list_ = os.listdir(FROM_FOLDER)
-    print("FROM: {} \n TO: {}".format(FROM_FOLDER, TO_FOLDER), flush=True)
 
     for file_ in tqdm(list_):
-        # split the name of the file at the period
         name, ext = os.path.splitext(file_)
-
-        # idk wtf this does
         ext = ext[1:]
 
-        # if ext == "" or seq_search(ext, EXCLUDE) != -1:
-        #    continue
-
-        if seq_search(ext, CONFIRM_FILE_TYPES) != -1:
-            NEEDS_CONFIRMATION.append(file_)
+        if seq_search(ext.lower(), CONFIRM_FILE_TYPES) != -1:
+            confirmations(file_, ext)
             continue
 
-        if name.split("_")[0] == "redditsave.com":
-            REDDITSAVE_VIDEOS.append(file_)
-            continue
-
-        if ext == "saber":
-            move(FROM_FOLDER + "/" + file_, BEAT_SABER_SWORD_LOCATION + "/" + file_)
+        if name.split("_")[0] == RED_SAV:
+            reddistave_remove(file_, ext)
             continue
 
         if os.path.exists(TO_FOLDER + "/" + ext):
@@ -77,91 +71,31 @@ def sort():
 
 
 # prompts users if they tould like to delete particular file types
-def confirmations():
-    for file_ in NEEDS_CONFIRMATION:
-        print(
-            f"\n{file_} could be a temp or an installation file. Would you like to move it to the recycle bin?"
-        )
-
-        _name, ext = os.path.splitext(file_)
-
-        try:
-            if input("y/[n] ") == "y":
-                os.remove(FROM_FOLDER + "/" + file_)
-                print("Sent to trash")
-            else:
-                print("not sent to trash")
-                move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
-        except:
-            print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
-            # println(e)
-            continue
-
-
-def handle_name_conflict(file_from: str, file_to: str):
-    """handles a naming conflict between two files
-    Params: 
-    file_from: path of the file in source folder 
-    file_to: path of the file in destination folder"""
-
-
-# I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
-def redditsave_remove():
-    for i in REDDITSAVE_VIDEOS:
-        # name, ext = os.path.splitext(i)
-        old = os.path.basename(i)
-        new = old.replace("redditsave.com", "")
-        os.rename(FROM_FOLDER + "/" + old, FROM_FOLDER + "/" + new)
-
-
-def sort_new():
-    list_ = os.listdir(FROM_FOLDER)
-
-    for file_ in tqdm(list_):
-        name, ext = os.path.splitext(file_)
-        ext = ext[1:]
-
-        if seq_search(ext, CONFIRM_FILE_TYPES) != -1:
-            confirmations_new(file_, ext)
-            continue
-
-        if name.split("_")[0] == "redditsave.com":
-            reddistave_remove_new(file_)
-            continue
-
-        if os.path.exists(TO_FOLDER + "/" + ext):
-            move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
-        else:
-            os.makedirs(TO_FOLDER + "/" + ext)
-            move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
-
-
-def confirmations_new(file, ext: str):
+def confirmations(file, ext: str):
 
     print(
         f"\n{file} could be a temp or an installation file. Would you like to move it to the recycle bin?"
     )
 
-    # _name, ext = os.path.splitext(file)
-
-    try:
-        if input("y/[n] ") == "y":
-            os.remove(FROM_FOLDER + "/" + file)
-            print("Sent to trash")
-        else:
-            print("not sent to trash")
+    if input("y/[n] ") == "y":
+        os.remove(FROM_FOLDER + "/" + file)
+        print("Sent to trash")
+    else:
+        print("not sent to trash")
+        if os.path.exists(TO_FOLDER + "/" + ext):
             move(FROM_FOLDER + "/" + file, TO_FOLDER + "/" + ext + "/" + file)
-    except:
-        print(r"There was a problem or something, idk ¯\_(ツ)_/¯")
-        # println(e)
+        else:
+            os.makedirs(TO_FOLDER + "/" + ext)
+            move(FROM_FOLDER + "/" + file, TO_FOLDER + "/" + ext + "/" + file)
 
 
-def reddistave_remove_new(file):
-    # name, ext = os.path.splitext(file)
+# I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
+def reddistave_remove(file, ext: str):
+
     old = os.path.basename(file)
     new = old.replace("redditsave.com", "")
     os.rename(FROM_FOLDER + "/" + old, FROM_FOLDER + "/" + new)
-    move(FROM_FOLDER + "/" + new, TO_FOLDER + "/" + new)
+    move(FROM_FOLDER + "/" + new, TO_FOLDER + "/" + ext + "/" + new)
 
 
 if __name__ == "__main__":
