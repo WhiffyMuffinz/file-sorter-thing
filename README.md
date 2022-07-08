@@ -5,4 +5,4 @@ The core code of the program is from here: https://www.geeksforgeeks.org/python-
 
 ## This is mostly untested. Use at your own risk.
 
-If you find any issues, please open an issue [here]](https://github.com/WhiffyMuffinz/file-sorter-thing/issues).
+If you find any issues, please open an issue [here](https://github.com/WhiffyMuffinz/file-sorter-thing/issues).
