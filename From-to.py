@@ -7,10 +7,6 @@ import os
 from shutil import move
 from tqdm import tqdm
 
-# # these will be the Path of the source folder and the destination folder
-# FROM_FOLDER = r"C:/Users/Skippy/Downloads"  # the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
-# TO_FOLDER = r"D:/Archive/Random Files"
-
 
 # commonly used strings
 RED_SAV = "redditsave.com"
@@ -29,13 +25,6 @@ CONFIRM_FILE_TYPES = [
     "xapk",
     "appinstaller",
 ]
-
-
-# list of files that might need confirmation
-# NEEDS_CONFIRMATION = []  # leave this list empty
-
-# list of videos whose name starts with redditsave
-# REDDITSAVE_VIDEOS = []  # leave this list empty
 
 
 def main():
