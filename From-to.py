@@ -7,17 +7,18 @@ import os
 from shutil import move
 from tqdm import tqdm
 
-# these will be the Path of the source folder and the destination folder
-FROM_FOLDER = r"C:/Users/Skippy/Downloads"  # the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
-TO_FOLDER = r"D:/Archive/Random Files"
+# # these will be the Path of the source folder and the destination folder
+# FROM_FOLDER = r"C:/Users/Skippy/Downloads"  # the "r" in front of the sring means raw, it lets you put backslashes in the string without the next character being escaped
+# TO_FOLDER = r"D:/Archive/Random Files"
 
 
 # commonly used strings
 RED_SAV = "redditsave.com"
-CONFIRM_LOCATION = r"~/.config/file-sort-thing/confirm-file-types.conf"
-PATHS_LOCATION = r"~/.config/file-sort-thing/paths.conf"
+CONFIG_PATH = r"~/.config/file-sorter-thing/"
+CONFIRM_NAME = r"confirm-file-types.conf"
+PATHS_NAME = r"paths.conf"
 
-# list of file types that might need confirmation
+# list of file types that might need confirmation before deletion
 CONFIRM_FILE_TYPES = [
     "exe",
     "msi",
@@ -31,66 +32,94 @@ CONFIRM_FILE_TYPES = [
 
 
 # list of files that might need confirmation
-NEEDS_CONFIRMATION = []  # leave this list empty
+# NEEDS_CONFIRMATION = []  # leave this list empty
 
 # list of videos whose name starts with redditsave
-REDDITSAVE_VIDEOS = []  # leave this list empty
+# REDDITSAVE_VIDEOS = []  # leave this list empty
+
+
+def main():
+
+    (from_folder, to_folder, confirm_file_types) = config()
+
+    sort(from_folder, to_folder, confirm_file_types)
 
 
 def config():
     """this function will be used to configure the program"""
-    """first check ~/.config/file-sort-thing/paths.conf for the location of the source and destination folders"""
+    """first check ~/.config/file-sorter-thing/paths.conf for the location of the source and destination folders"""
     """if the file doesn't exist, prompt the user to create it"""
     """then look for a file in the same folder called `confirm-file-types` and add the file types to the list CONFIRM_FILE_TYPES"""
 
-    conf_paths()
-    conf_types()
+    paths = config_paths()
+
+    confirm_file_types = config_types()
+    out: tuple(str, str, list[str]) = (paths[0], paths[1], confirm_file_types)
+    return out
 
 
-def conf_paths():
+def config_paths():
+    from_folder, to_folder = "", ""
     # check if the file exists
-    if os.path.exists(os.path.expanduser(PATHS_LOCATION)):
+    if os.path.exists(os.path.expanduser(CONFIG_PATH + PATHS_NAME)):
         # if it does, read the file
-        with open(os.path.expanduser(PATHS_LOCATION), "r") as f:
+        with open(os.path.expanduser(CONFIG_PATH + PATHS_NAME), "r") as f:
             lines = f.readlines()
             for line in lines:
                 if line.startswith("source"):
-                    FROM_FOLDER = line.split("=")[1].strip()
-                    if not os.path.exists(FROM_FOLDER):
+                    from_folder = line.split("=")[1].strip()
+                    if not os.path.exists(from_folder):
                         print(
                             "There was an error with the source path. Please check the file."
                         )
+                        exit()
                 if line.startswith("destination"):
-                    TO_FOLDER = line.split("=")[1].strip()
-                    if not os.path.exists(TO_FOLDER):
+                    to_folder = line.split("=")[1].strip()
+                    if not os.path.exists(to_folder):
                         print(
                             "There was an error with the destination path. Please check the file."
                         )
+                        exit()
     else:
         # if it doesn't, create it and prompt the user to fill it out manualy
-        with open(os.path.expanduser(PATHS_LOCATION), "w") as f:
-            f.write(
-                "# this file is used to configure the program\n"
-                + "# absolute paths are recommended\n"
-                + "# if using Windows, remember to use double backslashes\n"
-                + "source="
-                + "\n"
-                + "destination="
-                + "\n"
+        create_path_config()
+
+    out = (from_folder, to_folder)
+    return out
+
+
+def create_path_config():
+    os.makedirs(os.path.expanduser(CONFIG_PATH))
+    with open(os.path.expanduser(CONFIG_PATH + PATHS_NAME), "w") as f:
+        f.write(
+            "# this file is used to configure the program\n"
+            + "# absolute paths are recommended\n"
+            + "# if using Windows, remember to use double backslashes\n"
+            + "source="
+            + "\n"
+            + "destination="
+            + "\n"
+        )
+        print(
+            "This program requires configuration of source and destination paths. A configuration file has been created at {}, please look at it".format(
+                os.path.expanduser(CONFIG_PATH + PATHS_NAME)
             )
+        )
+        exit()
 
 
-def conf_types():
+def config_types() -> list[str]:
+    out = []
     # check if the file exists
-    if os.path.exists(os.path.expanduser(CONFIRM_LOCATION)):
+    if os.path.exists(os.path.expanduser(CONFIG_PATH + CONFIRM_NAME)):
         # if it does, read the file
-        with open(os.path.expanduser(CONFIRM_LOCATION), "r") as f:
+        with open(os.path.expanduser(CONFIG_PATH + CONFIRM_NAME), "r") as f:
             lines = f.readlines()
             for line in lines:
-                CONFIRM_FILE_TYPES.append(line.strip())
+                out.append(line.strip())
     else:
         # if it doesn't, create it and add the baked in file types to the list
-        with open(os.path.expanduser(CONFIRM_LOCATION), "w") as f:
+        with open(os.path.expanduser(CONFIG_PATH + CONFIRM_NAME), "w") as f:
 
             for ext in CONFIRM_FILE_TYPES:
                 f.write(ext + "\n")
@@ -102,72 +131,60 @@ def conf_types():
             print(
                 "please add the file types you want to be prompted for to the list in the file."
             )
-
-
-def main():
-    config()
-    sort()
-
-
-# sequential search
-def seq_search(to_find, to_search):
-    for i in range(len(to_search)):
-        tmp = to_search[i]
-
-        if to_find == tmp:
-            return i
-    return -1
+    return out
 
 
 # main sorting function.
-def sort():
-    list_ = os.listdir(FROM_FOLDER)
+def sort(from_folder: str, to_folder: str, confirm_file_types: list[str]):
+    list_ = os.listdir(from_folder)
 
     for file_ in tqdm(list_):
         name, ext = os.path.splitext(file_)
+        print(name, ext)
         ext = ext[1:]
+        print(ext)
 
-        if seq_search(ext.lower(), CONFIRM_FILE_TYPES) != -1:
-            confirmations(file_, ext)
+        if ext.lower() in confirm_file_types:
+            confirmations(file_, ext, from_folder, to_folder)
             continue
 
         if name.split("_")[0] == RED_SAV:
-            reddistave_remove(file_, ext)
+            reddistave_remove(file_, ext, from_folder, to_folder)
             continue
 
-        if os.path.exists(TO_FOLDER + "/" + ext):
-            move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
+        if os.path.exists(to_folder + "/" + ext):
+            move(from_folder + "/" + file_, to_folder + "/" + ext + "/" + file_)
         else:
-            os.makedirs(TO_FOLDER + "/" + ext)
-            move(FROM_FOLDER + "/" + file_, TO_FOLDER + "/" + ext + "/" + file_)
+            os.makedirs(to_folder + "/" + ext)
+            move(from_folder + "/" + file_, to_folder + "/" + ext + "/" + file_)
 
 
 # prompts users if they tould like to delete particular file types
-def confirmations(file, ext: str):
+def confirmations(file, ext: str, from_folder: str, to_folder: str):
 
     print(
-        f"\n{file} could be a temp or an installation file. Would you like to move it to the recycle bin?"
+        f"\n{file} could be an unneeded file. Would you like to move it to the recycle bin?"
     )
 
     if input("y/[n] ") == "y":
-        os.remove(FROM_FOLDER + "/" + file)
+        os.remove(from_folder + "/" + file)
         print("Sent to trash")
     else:
         print("not sent to trash")
-        if os.path.exists(TO_FOLDER + "/" + ext):
-            move(FROM_FOLDER + "/" + file, TO_FOLDER + "/" + ext + "/" + file)
+        if os.path.exists(to_folder + "/" + ext):
+            move(from_folder + "/" + file, to_folder + "/" + ext + "/" + file)
         else:
-            os.makedirs(TO_FOLDER + "/" + ext)
-            move(FROM_FOLDER + "/" + file, TO_FOLDER + "/" + ext + "/" + file)
+            os.makedirs(to_folder + "/" + ext)
+            move(from_folder + "/" + file, to_folder + "/" + ext + "/" + file)
 
 
 # I save lots of videos from reddit, and the service I use adds its name to the saved file, so I remove it
-def reddistave_remove(file, ext: str):
+def reddistave_remove(file, ext: str, from_folder: str, to_folder: str):
 
     old = os.path.basename(file)
     new = old.replace("redditsave.com", "")
-    os.rename(FROM_FOLDER + "/" + old, FROM_FOLDER + "/" + new)
-    move(FROM_FOLDER + "/" + new, TO_FOLDER + "/" + ext + "/" + new)
+    os.rename(from_folder + "/" + old, from_folder + "/" + new)
+    move(from_folder + "/" + new, to_folder + "/" + ext + "/" + new)
 
 
 if __name__ == "__main__":
