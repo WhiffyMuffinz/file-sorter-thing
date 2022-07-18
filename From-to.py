@@ -129,9 +129,9 @@ def sort(from_folder: str, to_folder: str, confirm_file_types: list[str]):
 
     for file_ in tqdm(list_):
         name, ext = os.path.splitext(file_)
-        print(name, ext)
+        #print(name, ext)
         ext = ext[1:]
-        print(ext)
+        #print(ext)
 
         if ext.lower() in confirm_file_types:
             confirmations(file_, ext, from_folder, to_folder)
